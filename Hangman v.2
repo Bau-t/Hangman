@@ -1,0 +1,133 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
+
+// TAKES IN USER INPUT TO COMPARE IT WITH THE RANDOMLY CHOSEN WORD
+std::string letterGuess(std::string& randomWord, std::string& outlineWord, char userLetter)
+{
+    for (int position = 0; position < randomWord.length(); position++)
+    {
+        if (userLetter == randomWord[position])
+        {
+            outlineWord[position] = userLetter;
+        }
+    }
+    return outlineWord;
+}
+
+// GETS THE LENGTH OF THE WORD AND PRINTS THE EMPTY OUTLINE OF THE WORD
+//function declaration of type string, takes in string parameters
+std::string hiddenWordOutline(std::string& randomWord)
+{
+    int size = randomWord.length();
+    std::string emptyString;
+
+    for (int iteration = 0; iteration < size; iteration++)
+    {
+        emptyString += "_ ";
+    }
+    return emptyString;
+}
+
+// CHOOSES A RANDOM WORD FROM THE TXT FILE
+//function of type string
+std::string randomWord()
+{
+    //string declaration, hangmanWord
+    std::string hangmanWord;
+
+    //opens the dictionary of words from the txt file
+    std::ifstream wordDictionary ("C:/common-7-letter-words.txt");
+
+    // creates a random number from the number words in the txt file (5757)
+    srand((unsigned) time(NULL));
+    int randomNumLine = rand() % 1371;
+
+    //condition when the dictionary is open
+    if (wordDictionary.is_open())
+    {
+        //iterates through the txt file until it gets to the word
+        for (int iteration = 1; iteration < randomNumLine; ++iteration)
+        {
+            //reads the word and sends it hangmanWord
+            std::getline(wordDictionary,hangmanWord);
+        }
+    }
+
+    //returns it to the main function
+    return hangmanWord;
+}
+
+int main()
+{
+    //LOAD WINDOW
+    // renders the size and title of the window
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Hangman!");
+
+    //LOAD FONT FROM FILE
+    sf::Font font;
+    // load the text font from file path, font from dafont.com
+    font.loadFromFile("C:/Catfiles.ttf");
+
+    //RANDOM WORD FROM FUNCTION
+    // declares Word to be the randomly selected word from the randomWord() function
+    std::string gameWord = randomWord();
+
+    //RANDOM WORD UNDERSCORE OUTLINE
+    //creates the outline of the word "_ _ _..." by calling the hiddenWord() function
+    std::string wordOutline = hiddenWordOutline(gameWord);
+
+    //SETS THE TEXT SETTINGS
+    sf::Text textInitial;
+    textInitial.setFont(font);
+    textInitial.setString(wordOutline);
+    textInitial.setCharacterSize(90);
+    textInitial.setFillColor(sf::Color::White);
+
+    //creates a new text variable "newOutline." Used to print the updated string after a user input
+    sf::Text newOutline;
+    newOutline.setFont(font);
+    newOutline.setCharacterSize(90);
+    newOutline.setFillColor(sf::Color::White);
+
+    // the window for the display
+    while (window.isOpen())
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            switch (event.type)
+            {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                case sf::Event::TextEntered:
+                   if (event.text.unicode < 128)
+                   {
+                       newOutline.setString(letterGuess(gameWord,wordOutline,static_cast<char>(event.text.unicode)));
+                       window.draw(newOutline);
+                   }
+
+                        //detects the letter
+                        //static_cast<char>(event.text.unicode)
+
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        //window.draw(newOutline);
+
+        // clears the screen so dont include that (???)
+        //window.clear(sf::Color::Black);
+
+        //window.draw(textInitial);
+
+        window.display();
+    }
+
+    return 0;
+}
