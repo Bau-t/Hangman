@@ -1,0 +1,517 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <string>
+#include <bits/stdc++.h>
+
+#include "HangmanGraphicBody.h"
+
+// CHECKS THE AMOUNT OF ATTEMPTS BASED ON HOW MANY TIMES A USER ENTERED A LETTER
+
+bool attemptCounter(int *triesCounterPtr)
+{
+    //(test to show that pointer works)
+    std::cout << std::endl;
+    std::cout << *triesCounterPtr;
+    //de referenced number
+    if (*triesCounterPtr == 6)
+    {
+        return true;
+    }
+    else
+    {
+        //increment the de referenced number in the main function when main condition not met
+        (*triesCounterPtr)++;
+        return false;
+    }
+}
+
+// TAKES IN USER CHARACTER INPUT TO COMPARE IT WITH THE RANDOMLY CHOSEN WORD
+std::string letterGuess(std::string& randomWord, std::string& outlineWord, char userLetter)
+{
+    //for loop checks the character that the user inserted.
+    for (int position = 0; position < randomWord.length(); position++)
+    {
+        if (userLetter == randomWord[position])
+        {
+            outlineWord[position] = userLetter;
+        }
+    }
+    return outlineWord;
+}
+
+// GETS THE LENGTH OF THE WORD AND PRINTS THE EMPTY OUTLINE OF THE WORD
+//function declaration of type string, takes in string parameters
+std::string hiddenWordOutline(std::string& randomWord)
+{
+    //gets a length from the random word
+    int size = randomWord.size();
+    std::string emptyString;
+
+    //the size of the word will determine how many underscores will be printed
+    for (int iteration = 0; iteration < size; iteration++)
+    {
+        emptyString += "_";
+    }
+    return emptyString;
+}
+
+// CHOOSES A RANDOM WORD FROM THE TXT FILE
+//function of type string
+std::string randomWord()
+{
+    //string declaration, hangmanWord
+    std::string hangmanWord;
+
+    //opens the dictionary of words from the txt file
+    std::ifstream wordDictionary ("C:/common-7-letter-words_and8.txt");
+
+    // creates a random number from the number words in the txt file ()
+    srand((unsigned) time(NULL));
+    int randomNumLine = rand() % 2354;
+
+    //condition when the dictionary is open
+    if (wordDictionary.is_open())
+    {
+        //iterates through the txt file until it gets to the word
+        for (int iteration = 1; iteration < randomNumLine; ++iteration)
+        {
+            //reads the word and sends it hangmanWord
+            std::getline(wordDictionary,hangmanWord);
+        }
+    }
+
+    //returns it to the main function
+    return hangmanWord;
+}
+
+int main()
+{
+
+    //Declaring all the shapes/lines included in the game
+
+    //the gallows/hanger object
+
+    sf::RectangleShape gallows_part_1(sf::Vector2f(500.f, 20.f));
+    sf::RectangleShape gallows_part_2(sf::Vector2f(700.f, 20.f));
+    sf::RectangleShape gallows_part_3(sf::Vector2f(300.f, 20.f));
+    sf::RectangleShape gallows_part_4(sf::Vector2f(80.f,5.f));
+    sf::RectangleShape gallows_part_5(sf::Vector2f(125.f,20.f));
+
+    //each body part
+    sf::CircleShape head(50.f);
+    sf::RectangleShape body(sf::Vector2f(225.f, 12.f));
+    sf::RectangleShape arm1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape arm2(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg2(sf::Vector2f(150.f, 12.f));
+    //Text and font declared
+    sf::Font font;
+    font.loadFromFile("C:/SF Funk Master.ttf");
+    sf::Text a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z;
+
+    //Setting all the shapes to position and reshape
+    //SET POSITION OF THE GALLOWS/HANGER
+    gallows_part_1.setFillColor(sf::Color::White);
+    gallows_part_1.setPosition(100.f, 850.f);
+    gallows_part_2.rotate(90.f);
+    gallows_part_2.setPosition(230.f, 150.f);
+    gallows_part_3.setPosition(230.f, 150.f);
+    gallows_part_4.rotate(90.f);
+    gallows_part_4.setPosition(450.f, 170.f);
+    gallows_part_5.rotate(135.f);
+    gallows_part_5.setPosition(315.f, 170.f);
+
+    //SET POSITION OF THE BODY PARTS
+    head.setPosition(395.f, 260.f);
+    head.setOutlineThickness(12.f);
+    body.rotate(90.f);
+    body.setPosition(450.f,370.f);
+    arm1.rotate(45.f);
+    arm1.setPosition(448.f,415.f);
+    arm2.rotate(135.f);
+    arm2.setPosition(450.f,420.f);
+    leg1.rotate(45.f);
+    leg1.setPosition(448.f,585.f);
+    leg2.rotate(135.f);
+    leg2.setPosition(450.f,590.f);
+    head.setFillColor(sf::Color::Black);
+    head.setOutlineColor(sf::Color::White);
+
+    //Set up all the letters
+    a.setFont(font);
+    a.setString("A");
+    a.setCharacterSize(50);
+    a.setPosition(1200.f,100.f);
+    b.setFont(font);
+    b.setString("B");
+    b.setCharacterSize(50);
+    b.setPosition(1250.f,100.f);
+    c.setFont(font);
+    c.setString("C");
+    c.setCharacterSize(50);
+    c.setPosition(1300.f,100.f);
+    d.setFont(font);
+    d.setString("D");
+    d.setCharacterSize(50);
+    d.setPosition(1350.f,100.f);
+    e.setFont(font);
+    e.setString("E");
+    e.setCharacterSize(50);
+    e.setPosition(1400.f,100.f);
+    f.setFont(font);
+    f.setString("F");
+    f.setCharacterSize(50);
+    f.setPosition(1450.f,100.f);
+    g.setFont(font);
+    g.setString("G");
+    g.setCharacterSize(50);
+    g.setPosition(1500.f,100.f);
+    h.setFont(font);
+    h.setString("H");
+    h.setCharacterSize(50);
+    h.setPosition(1550.f,100.f);
+    i.setFont(font);
+    i.setString("I");
+    i.setCharacterSize(50);
+    i.setPosition(1600.f,100.f);
+    j.setFont(font);
+    j.setString("J");
+    j.setCharacterSize(50);
+    j.setPosition(1635.f,100.f);
+    k.setFont(font);
+    k.setString("K");
+    k.setCharacterSize(50);
+    k.setPosition(1685.f,100.f);
+    l.setFont(font);
+    l.setString("L");
+    l.setCharacterSize(50);
+    l.setPosition(1735.f,100.f);
+    m.setFont(font);
+    m.setString("M");
+    m.setCharacterSize(50);
+    m.setPosition(1785.f,100.f);
+    n.setFont(font);
+    n.setString("N");
+    n.setCharacterSize(50);
+    n.setPosition(1200.f,175.f);
+    o.setFont(font);
+    o.setString("O");
+    o.setCharacterSize(50);
+    o.setPosition(1250.f,175.f);
+    p.setFont(font);
+    p.setString("P");
+    p.setCharacterSize(50);
+    p.setPosition(1300.f,175.f);
+    q.setFont(font);
+    q.setString("Q");
+    q.setCharacterSize(50);
+    q.setPosition(1350.f,175.f);
+    r.setFont(font);
+    r.setString("R");
+    r.setCharacterSize(50);
+    r.setPosition(1400.f,175.f);
+    s.setFont(font);
+    s.setString("S");
+    s.setCharacterSize(50);
+    s.setPosition(1450.f,175.f);
+    t.setFont(font);
+    t.setString("T");
+    t.setCharacterSize(50);
+    t.setPosition(1500.f,175.f);
+    u.setFont(font);
+    u.setString("U");
+    u.setCharacterSize(50);
+    u.setPosition(1550.f,175.f);
+    v.setFont(font);
+    v.setString("V");
+    v.setCharacterSize(50);
+    v.setPosition(1600.f,175.f);
+    w.setFont(font);
+    w.setString("W");
+    w.setCharacterSize(50);
+    w.setPosition(1650.f,175.f);
+    x.setFont(font);
+    x.setString("X");
+    x.setCharacterSize(50);
+    x.setPosition(1720.f,175.f);
+    y.setFont(font);
+    y.setString("Y");
+    y.setCharacterSize(50);
+    y.setPosition(1770.f,175.f);
+    z.setFont(font);
+    z.setString("Z");
+    z.setCharacterSize(50);
+    z.setPosition(1820.f,175.f);
+
+    //LOAD WINDOW
+    // renders the size and title of the window
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Hangman!");
+
+    //RANDOM WORD FROM FUNCTION
+    // declares Word to be the randomly selected word from the randomWord() function
+    std::string gameWord = randomWord();
+
+    //MAKES THE WORD INTO ALL LOWERCASE
+    for (auto& character : gameWord)
+    {
+        character = tolower(character);
+    }
+
+    //testing purposes (output window)
+    std::cout << gameWord;
+
+    //RANDOM WORD UNDERSCORE OUTLINE
+    //creates the outline of the word "_ _ _..." by calling the hiddenWordOutline() function
+    std::string wordOutline = hiddenWordOutline(gameWord);
+
+    //SETS THE TEXT SETTINGS
+    sf::Text initialOutline;
+    initialOutline.setFont(font);
+
+    initialOutline.setString(wordOutline);
+
+    initialOutline.setCharacterSize(90);
+    initialOutline.setFillColor(sf::Color::White);
+    initialOutline.setPosition(1150,765);
+
+    //creates a new text variable "newOutline." Used to print the updated string after a user input
+    sf::Text newOutline;
+    newOutline.setFont(font);
+    newOutline.setCharacterSize(90);
+    newOutline.setFillColor(sf::Color::White);
+    newOutline.setPosition(1150,765);
+
+    int triesCounter = 1;
+
+    // the window for the display
+    while (window.isOpen())
+    {
+        window.draw(initialOutline);
+
+        sf::Event event{};
+        while (window.pollEvent(event))
+        {
+
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+                break;
+            }
+            else if (event.type == sf::Event::Resized)
+            {
+                sf::FloatRect visibleArea(0, 0, event.size.width, event.size.height);
+                window.setView(sf::View(visibleArea));
+            }
+            else if (event.type == sf::Event::TextEntered && event.text.unicode < 128)
+            {
+
+                //press "Esc" to close the game
+                if (event.text.unicode == 27)
+                {
+                    return 0;
+                }
+                else
+                {
+                    //creates a newoutline by sending the random game word, the original underscore outline, and the character entered to
+                    // letterGuess function which compares the character. Will update the new outline
+                    newOutline.setString(letterGuess(gameWord,wordOutline,static_cast<char>(event.text.unicode)));
+
+                    //boolean value checks for true/false when sending the VALUE of the triesCounter (initially 1)
+                    bool counterChecker = attemptCounter(&triesCounter);
+                    //IF BOOL SENDS TRUE, PROGRAM ENDS
+                    if (counterChecker)
+                    {
+                        std::cout << "\nGame over." << std::endl;
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        //Display all the body
+
+        //clears the screen, allows the underscore outline to not be printed over and over again
+        window.clear();
+
+        window.draw(newOutline);
+
+        window.draw(gallows_part_1);
+        window.draw(gallows_part_2);
+        window.draw(gallows_part_3);
+        window.draw(gallows_part_4);
+        window.draw(gallows_part_5);
+
+        //body parts, total of 6 for the attempts
+        window.draw(head);
+        window.draw(body);
+        window.draw(leg1);
+        window.draw(leg2);
+        window.draw(arm1);
+        window.draw(arm2);
+
+        //display all letters
+        window.draw(a);
+        window.draw(b);
+        window.draw(c);
+        window.draw(d);
+        window.draw(e);
+        window.draw(f);
+        window.draw(g);
+        window.draw(h);
+        window.draw(i);
+        window.draw(j);
+        window.draw(k);
+        window.draw(l);
+        window.draw(m);
+        window.draw(n);
+        window.draw(o);
+        window.draw(p);
+        window.draw(q);
+        window.draw(r);
+        window.draw(s);
+        window.draw(t);
+        window.draw(u);
+        window.draw(v);
+        window.draw(w);
+        window.draw(x);
+        window.draw(y);
+        window.draw(z);
+        window.display();
+
+        //Turning keys to gray when used
+        //DETECTS KEY PRESSED FOR LETTERS A-Z, TURNS GRAY IF PRESSED
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            a.setFillColor(sf::Color{250,250,250,127});
+            window.draw(a);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
+        {
+            b.setFillColor(sf::Color{250,250,250,127});
+            window.draw(b);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+        {
+            c.setFillColor(sf::Color{250,250,250,127});
+            window.draw(c);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            d.setFillColor(sf::Color{250,250,250,127});
+            window.draw(d);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+        {
+            e.setFillColor(sf::Color{250,250,250,127});
+            window.draw(e);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+        {
+            f.setFillColor(sf::Color{250,250,250,127});
+            window.draw(f);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::G))
+        {
+            g.setFillColor(sf::Color{250,250,250,127});
+            window.draw(g);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::H))
+        {
+            h.setFillColor(sf::Color{250,250,250,127});
+            window.draw(h);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
+        {
+            i.setFillColor(sf::Color{250,250,250,127});
+            window.draw(i);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
+        {
+            j.setFillColor(sf::Color{250,250,250,127});
+            window.draw(j);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+        {
+            k.setFillColor(sf::Color{250,250,250,127});
+            window.draw(k);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+        {
+            l.setFillColor(sf::Color{250,250,250,127});
+            window.draw(l);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::M))
+        {
+            m.setFillColor(sf::Color{250,250,250,127});
+            window.draw(m);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
+        {
+            n.setFillColor(sf::Color{250,250,250,127});
+            window.draw(n);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+        {
+            o.setFillColor(sf::Color{250,250,250,127});
+            window.draw(o);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+        {
+            p.setFillColor(sf::Color{250,250,250,127});
+            window.draw(p);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        {
+            q.setFillColor(sf::Color{250,250,250,127});
+            window.draw(q);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+        {
+            r.setFillColor(sf::Color{250,250,250,127});
+            window.draw(r);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            s.setFillColor(sf::Color{250,250,250,127});
+            window.draw(s);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::T))
+        {
+            t.setFillColor(sf::Color{250,250,250,127});
+            window.draw(t);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::U))
+        {
+            u.setFillColor(sf::Color{250,250,250,127});
+            window.draw(u);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::V))
+        {
+            v.setFillColor(sf::Color{250,250,250,127});
+            window.draw(v);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            w.setFillColor(sf::Color{250,250,250,127});
+            window.draw(w);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+        {
+            x.setFillColor(sf::Color{250,250,250,127});
+            window.draw(x);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
+        {
+            y.setFillColor(sf::Color{250,250,250,127});
+            window.draw(y);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+        {
+            z.setFillColor(sf::Color{250,250,250,127});
+            window.draw(z);
+        }
+    }
+    return 0;
+}
