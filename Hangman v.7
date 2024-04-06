@@ -1,0 +1,695 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <bits/stdc++.h>
+
+//WILL CHECK IF THE CURRENT LETTER BY THE USER IS IN THE GAME WORD, IF TRUE THEN IT LETS THE USER KNOW IT IS CORRECT. IF FALSE IT WILL
+// PENALIZE THE USER AND TAKE AN ATTEMPT
+bool isWordGuessed(std::string& currentWordStatus, std::string& gameWord)
+{
+    //USER HAS CORRECTLY GUESSED ALL THE LETTERS
+    if (gameWord == currentWordStatus)
+        return true;
+    //USER HAS NOT GUESSED ALL THE LETTERS
+    else
+        return false;
+}
+
+//BOOL FUNCTION WILL CHECK IF THE LETTER INPUT IS IN THE WORD THEY NEED TO GUESS (will let the user know in the main function)
+bool isLetterInGuess(char currentLetterConst, std::string gameWord)
+{
+    //ITERATES THROUGH THE WORD THEY NEED TO GUESS, AND CHECK EACH CHARACTER WITH THE USER LETTER INPUT
+    for (const auto& gameLetterIterate : gameWord)
+    {
+        if (gameLetterIterate == currentLetterConst)
+        {
+            return true;
+        }
+        else
+            continue;
+    }
+    //IF NONE MATCH, WILL RETURN FALSE
+    return false;
+}
+
+//CHECKS FOR DUPLICATE KEYBOARD INPUTS, WILL OVERRIDE ATTEMPT COUNTER IF DUPLICATE LETTER FOUND
+bool duplicateLetterCheck(char currentCharCheck, const std::vector<char>&charLetterListConst)
+{
+    //ITERATES THROUGH THE VECTOR THAT CONTAINS LETTERS ALREADY GUESSED, WILL CHECK IF THE CURRENT LETTER INPUT IS IN THE LIST
+    for (const auto &charIterate: charLetterListConst)
+    {
+        if (charIterate == currentCharCheck)
+        {
+            //IF THE CURRENT LETTER INPUT MATCHES THE LETTERS ALREADY GUESSED BY THE USER, it will return TRUE
+            return true;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    //IF THE CURRENT LETTER INPUT IS NOT IN THE VECTOR OF LETTERS ALREADY GUESSED, it will return FALSE
+    return false;
+}
+
+// CHECKS THE AMOUNT OF ATTEMPTS BASED ON HOW MANY TIMES A USER ENTERED A LETTER
+bool attemptCounter(int *triesCounterPtr)
+{
+
+    //DE REFERENCES THE POINTER TO CHECK THE CURRENT STATUS OF ATTEMPTS, IF THE MAX AMOUNT OF ATTEMPTS HAS BEEN REACHED, it will return TRUE
+    if (*triesCounterPtr == 5)
+    {
+        //(test to show that pointer works)
+        std::cout << "\nAttempt: " << *triesCounterPtr;
+        return true;
+    }
+    else
+    {
+        //IF THE MAX AMOUNT OF ATTEMPTS HAS NOT BEEN REACHED, IT WILL ITERATE THE DE-REFERENCED VALUE (triesCounter variable) BY ONE
+        (*triesCounterPtr)++;
+        //(test to show that pointer works)
+        std::cout << "\nAttempt: " << *triesCounterPtr;
+        return false;
+    }
+}
+
+// TAKES IN USER LETTER INPUT TO COMPARE IT WITH THE RANDOMLY CHOSEN WORD
+//TAKES IN PARAMETERS: GAME WORD, CURRENT OUTLINE OF THE WORD ("_ _ _..."), AND THE LETTER THE USER HAS INPUT
+std::string letterGuess(std::string& randomWord, std::string& outlineWord, char userLetter)
+{
+    //FOR LOOP CHECKS IF THE LETTER THE USER HAS INPUT MATCHES ANY LETTER IN THE GAME WORD, IF SO, IT WILL UPDATE THE OUTLINE OF THE WORD
+    // ex. "Is H in the word?" --> then new outline will be "_ _ H _ _"
+    for (int position = 0; position < randomWord.length(); position++)
+    {
+        if (userLetter == randomWord[position])
+        {
+            outlineWord[position] = userLetter;
+        }
+    }
+    return outlineWord;
+}
+
+// GETS THE LENGTH OF THE WORD AND PRINTS THE EMPTY OUTLINE OF THE WORD "_ _ _..."
+std::string hiddenWordOutline(std::string& randomWord)
+{
+    //GETS THE LENGTH OF THE WORD
+    int size = randomWord.size();
+    std::string emptyString;
+
+    //WILL CREATE AN OUTLINE BASED ON THE SIZE OF THE WORD, AND APPEND EACH UNDERSCORE TO THE emptyString VARIABLE
+    for (int iteration = 0; iteration < size; iteration++)
+    {
+        emptyString += "_";
+    }
+    return emptyString;
+}
+
+// CHOOSES A RANDOM WORD FROM THE TXT FILE
+std::string randomWord()
+{
+    // STRING DECLARATION FOR THE WORD THE USER NEEDS TO GUESS
+    std::string hangmanWord;
+
+    //OPENS THE TXT FILE OF THE LIST OF WORDS
+    std::ifstream wordDictionary ("C:/common-7-letter-words_and8.txt");
+
+    //GETS A RANDOM LINE FROM THE TXT FILE
+    srand((unsigned) time(NULL));
+    int randomNumLine = rand() % 2354;
+
+    //WILL THEN EXTRACT THE WORD FROM THE TXT FILE AND ASSIGN IT TO THE hangmanWord VARIABLE, THIS WILL BE THE WORD THE USER NEEDS TO GUESS
+    if (wordDictionary.is_open())
+    {
+        //iterates through the txt file until it gets to the word
+        for (int iteration = 1; iteration < randomNumLine; ++iteration)
+        {
+            //reads the word and sends it hangmanWord
+            std::getline(wordDictionary,hangmanWord);
+        }
+    }
+
+    //returns it to the main function
+    return hangmanWord;
+}
+
+int main()
+{
+    //DECLARING ALL THE SHAPES/LINES IN THE GAME
+
+    //THE GALLOWS/HANGER OBJECT
+    sf::RectangleShape gallows_part_1(sf::Vector2f(500.f, 20.f));
+    gallows_part_1.setFillColor(sf::Color{150,75,0});
+
+    sf::RectangleShape gallows_part_2(sf::Vector2f(700.f, 20.f));
+    gallows_part_2.setFillColor(sf::Color{150,75,0});
+
+    sf::RectangleShape gallows_part_3(sf::Vector2f(300.f, 20.f));
+    gallows_part_3.setFillColor(sf::Color{150,75,0});
+
+    sf::RectangleShape gallows_part_4(sf::Vector2f(80.f,5.f));
+    gallows_part_4.setFillColor(sf::Color{150,75,0});
+
+    sf::RectangleShape gallows_part_5(sf::Vector2f(125.f,20.f));
+    gallows_part_5.setFillColor(sf::Color{150,75,0});
+
+    //EACH BODY PART
+    sf::CircleShape head(70.f);
+    sf::RectangleShape body(sf::Vector2f(225.f, 12.f));
+    sf::RectangleShape arm1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape arm2(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg2(sf::Vector2f(150.f, 12.f));
+
+    //FONT DECLARED, TEXT MADE FOR THE LETTER TRACKER
+    sf::Font font;
+    font.loadFromFile("C:/SF Funk Master.ttf");
+    sf::Text a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z;
+
+    //SETTING ALL THE SHAPES TO THEIR POSITION
+    //SET POSITION OF THE GALLOWS/HANGER
+    gallows_part_1.setPosition(100.f, 850.f);
+    gallows_part_2.rotate(90.f);
+    gallows_part_2.setPosition(230.f, 150.f);
+    gallows_part_3.setPosition(230.f, 150.f);
+    gallows_part_4.rotate(90.f);
+    gallows_part_4.setPosition(450.f, 170.f);
+    gallows_part_5.rotate(135.f);
+    gallows_part_5.setPosition(315.f, 170.f);
+
+    //SET POSITION OF THE BODY PARTS AND COLOR
+    head.setPosition(380.f, 250.f);
+    head.setOutlineThickness(15.f);
+    body.rotate(90.f);
+    body.setPosition(450.f,370.f);
+    arm1.rotate(45.f);
+    arm1.setPosition(448.f,415.f);
+    arm2.rotate(135.f);
+    arm2.setPosition(450.f,420.f);
+    leg1.rotate(45.f);
+    leg1.setPosition(448.f,585.f);
+    leg2.rotate(135.f);
+    leg2.setPosition(450.f,590.f);
+    head.setFillColor(sf::Color::Transparent);
+    head.setOutlineColor(sf::Color::Transparent);
+    body.setFillColor(sf::Color::Transparent);
+    arm1.setFillColor(sf::Color::Transparent);
+    arm2.setFillColor(sf::Color::Transparent);
+    leg1.setFillColor(sf::Color::Transparent);
+    leg2.setFillColor(sf::Color::Transparent);
+
+    //SET UP THE ALPHABET FOR THE LETTER TRACKER (COLOR, POSITION, SIZE)
+    a.setFont(font);
+    a.setString("A");
+    a.setCharacterSize(50);
+    a.setPosition(1200.f,100.f);
+    b.setFont(font);
+    b.setString("B");
+    b.setCharacterSize(50);
+    b.setPosition(1250.f,100.f);
+    c.setFont(font);
+    c.setString("C");
+    c.setCharacterSize(50);
+    c.setPosition(1300.f,100.f);
+    d.setFont(font);
+    d.setString("D");
+    d.setCharacterSize(50);
+    d.setPosition(1350.f,100.f);
+    e.setFont(font);
+    e.setString("E");
+    e.setCharacterSize(50);
+    e.setPosition(1400.f,100.f);
+    f.setFont(font);
+    f.setString("F");
+    f.setCharacterSize(50);
+    f.setPosition(1450.f,100.f);
+    g.setFont(font);
+    g.setString("G");
+    g.setCharacterSize(50);
+    g.setPosition(1500.f,100.f);
+    h.setFont(font);
+    h.setString("H");
+    h.setCharacterSize(50);
+    h.setPosition(1550.f,100.f);
+    i.setFont(font);
+    i.setString("I");
+    i.setCharacterSize(50);
+    i.setPosition(1600.f,100.f);
+    j.setFont(font);
+    j.setString("J");
+    j.setCharacterSize(50);
+    j.setPosition(1635.f,100.f);
+    k.setFont(font);
+    k.setString("K");
+    k.setCharacterSize(50);
+    k.setPosition(1685.f,100.f);
+    l.setFont(font);
+    l.setString("L");
+    l.setCharacterSize(50);
+    l.setPosition(1735.f,100.f);
+    m.setFont(font);
+    m.setString("M");
+    m.setCharacterSize(50);
+    m.setPosition(1785.f,100.f);
+    n.setFont(font);
+    n.setString("N");
+    n.setCharacterSize(50);
+    n.setPosition(1200.f,175.f);
+    o.setFont(font);
+    o.setString("O");
+    o.setCharacterSize(50);
+    o.setPosition(1250.f,175.f);
+    p.setFont(font);
+    p.setString("P");
+    p.setCharacterSize(50);
+    p.setPosition(1300.f,175.f);
+    q.setFont(font);
+    q.setString("Q");
+    q.setCharacterSize(50);
+    q.setPosition(1350.f,175.f);
+    r.setFont(font);
+    r.setString("R");
+    r.setCharacterSize(50);
+    r.setPosition(1400.f,175.f);
+    s.setFont(font);
+    s.setString("S");
+    s.setCharacterSize(50);
+    s.setPosition(1450.f,175.f);
+    t.setFont(font);
+    t.setString("T");
+    t.setCharacterSize(50);
+    t.setPosition(1500.f,175.f);
+    u.setFont(font);
+    u.setString("U");
+    u.setCharacterSize(50);
+    u.setPosition(1550.f,175.f);
+    v.setFont(font);
+    v.setString("V");
+    v.setCharacterSize(50);
+    v.setPosition(1600.f,175.f);
+    w.setFont(font);
+    w.setString("W");
+    w.setCharacterSize(50);
+    w.setPosition(1650.f,175.f);
+    x.setFont(font);
+    x.setString("X");
+    x.setCharacterSize(50);
+    x.setPosition(1720.f,175.f);
+    y.setFont(font);
+    y.setString("Y");
+    y.setCharacterSize(50);
+    y.setPosition(1770.f,175.f);
+    z.setFont(font);
+    z.setString("Z");
+    z.setCharacterSize(50);
+    z.setPosition(1820.f,175.f);
+
+    //LOAD WINDOW
+    //RENDERS THE SIZE AND TITLE OF THE WINDOW
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "Hangman!");
+
+    //GETS A RANDOM WORD FROM THE randomWord() FUNCTION
+    std::string gameWord = randomWord();
+
+    //TURNS THE WORD INTO ALL LOWERCASE, by iterating through each character
+    for (auto& character : gameWord)
+    {
+        character = tolower(character);
+    }
+
+    //testing purposes (output window)
+    std::cout << gameWord;
+
+    //RANDOM WORD UNDERSCORE OUTLINE
+    //CREATES THE UNDERSCORE OUTLINE BY CALLING THE hiddenWordOutline() FUNC. AND SENDING THE VARIABLE gameWord (word user needs to guess)
+    //creates the outline of the word "_ _ _..." by calling the hiddenWordOutline() function
+    std::string wordOutline = hiddenWordOutline(gameWord);
+
+    //SETS THE TEXT SETTINGS
+
+    sf::Text correct;
+    correct.setFont(font);
+    correct.setCharacterSize(100);
+    correct.setFillColor(sf::Color::Transparent);
+    correct.setPosition(1250,400);
+    correct.setString("Correct!");
+
+    sf::Text wrong;
+    wrong.setFont(font);
+    wrong.setCharacterSize(100);
+    wrong.setFillColor(sf::Color::Transparent);
+    wrong.setPosition(1320,350);
+    wrong.setString("WRONG");
+
+    sf::Text tryAgain;
+    tryAgain.setFont(font);
+    tryAgain.setCharacterSize(100);
+    tryAgain.setFillColor(sf::Color::Transparent);
+    tryAgain.setPosition(1250,500);
+    tryAgain.setString("TRY AGAIN");
+
+    sf::Text youWin;
+    youWin.setFont(font);
+    youWin.setCharacterSize(100);
+    youWin.setFillColor(sf::Color::Transparent);
+    youWin.setPosition(700,450);
+    youWin.setString("You Win!");
+
+    sf::Text youLost;
+    youLost.setFont(font);
+    youLost.setCharacterSize(100);
+    youLost.setFillColor(sf::Color::Transparent);
+    youLost.setPosition(700,450);
+    youLost.setString("YOU LOST");
+
+    //CREATES AN WORD OUTLINE OBJECT THAT THE WINDOW WILL DISPLAY (takes in the wordOutline string)
+    sf::Text updateOutline;
+    updateOutline.setFont(font);
+    updateOutline.setCharacterSize(90);
+    updateOutline.setFillColor(sf::Color::White);
+    updateOutline.setPosition(1250,765);
+    updateOutline.setString(wordOutline);
+
+    sf::Time delay = sf::seconds(2);
+
+    //TRIES COUNTER VARIABLE
+    int triesCounter = 0;
+
+    //VECTOR LIST OF THE WORDS THE USER HAS INPUT THROUGHOUT THE GAME
+    std::vector <char> charLetterList;
+
+    // the window for the display
+    while (window.isOpen())
+    {
+        sf::Event event{};
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                window.close();
+                break;
+            }
+            //IF A THERE IS A LETTER INPUT, ACTIVATE THIS EVENT
+            else if (event.type == sf::Event::TextEntered && event.text.unicode > 96 && event.text.unicode < 128)
+            {
+
+                //ASSIGNS THE CURRENT LETTER INPUT TO A VARIABLE
+                char currentChar = static_cast<char>(event.text.unicode);
+
+                //press "Esc" to close the game
+                if (currentChar == 27)
+                {
+                    return 0;
+                }
+
+                //WILL USE THE CURRENT LETTER (currentChar) FOR THE ACTIONS BELOW
+                else
+                {
+                    //GIVEN THE LIST OF WORDS THAT THE USER INPUT, IT WILL CHECK IF THE USER PRESSES THE LETTER AGAIN, TO AVOID PENALIZATION
+                    bool duplicateBool = duplicateLetterCheck(currentChar,charLetterList);
+                    if (duplicateBool)
+                    {
+                        std::cout << "\nAlready tried!";
+                        break;
+                    }
+
+                    //IF THE USER DIDN'T ALREADY INPUT A SPECIFIC LETTER, WILL PERFORM THE FOLLOWING
+                    else
+                    {
+                        //ADD THE LETTER TO THE DUPLICATE LETTER LIST
+                        charLetterList.push_back(currentChar);
+
+                        //CREATES THE NEW OUTLINE BY SENDING THE GAME WORD, CURRENT WORD OUTLINE, AND THE LETTER THAT THE USER INPUT TO A
+                        // FUNCTION
+                        updateOutline.setString(letterGuess(gameWord,wordOutline,currentChar));
+
+                        //BOOL FUNCTION WILL CHECK IF THE USER INPUT LETTER IS IN THE GAME WORD, WILL LET THE USER KNOW IF TRUE
+                        bool isInGuess = isLetterInGuess(currentChar,gameWord);
+                        if (isInGuess)
+                        {
+                            tryAgain.setFillColor(sf::Color::Transparent);
+                            wrong.setFillColor(sf::Color::Transparent);
+
+                            correct.setFillColor(sf::Color::Green);
+                            std::cout << "\nIs in Guess!";
+                            break;
+                        }
+
+                        //IF THE LETTER IS NOT IN THE WORD, THE FOLLOWING ACTIONS WILL BE PERFORMED
+                        else
+                        {
+                            correct.setFillColor(sf::Color::Transparent);
+
+                            int random = rand() % 2;
+                            if (random == 1)
+                                wrong.setFillColor(sf::Color::Red);
+                            else
+                                tryAgain.setFillColor(sf::Color::Red);
+
+                            //BOOL VALUE WILL SEND THE CURRENT triesCounter (initially 0) VARIABLE TO DETERMINE BETWEEN TRUE/FALSE
+                            bool counterChecker = attemptCounter(&triesCounter);
+
+                            //IF BOOL SENDS TRUE (meaning that the max amount of attempts has been used) PROGRAM WILL END
+                            if (counterChecker)
+                            {
+                                //DEFAULTS THE WRONG ATTEMPTS DRAWINGS TO Transparent (to hide them) AND DISPLAYS THE "YOU LOST" IMAGE
+                                wrong.setFillColor(sf::Color::Transparent);
+                                tryAgain.setFillColor(sf::Color::Transparent);
+                                youLost.setFillColor(sf::Color::Cyan);
+                            }
+                        }
+                    }
+                }
+            }
+            //WILL CONSTANTLY CHECK IF THE USER HAS ALREADY GUESSED ALL THE LETTERS FOR THE GIVEN WORD THEY NEED TO GUESS, WILL END
+            // PROGRAM IF TRUE
+            if (isWordGuessed(wordOutline,gameWord))
+            {
+                youWin.setFillColor(sf::Color::Magenta);
+            }
+
+            //write conditions to change the color of the "Is in Guess" and "Wrong"
+
+        }
+
+
+        //CHANGE THE COLOR OF THE HANGMAN BODY TO MAKE IT VISIBLE AFTER AN ATTEMPT IS TAKEN
+        if (triesCounter == 1)
+        {
+            head.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 2)
+        {
+            body.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 3)
+        {
+            leg1.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 4)
+        {
+            leg2.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 5)
+        {
+            arm1.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 6)
+        {
+            arm2.setFillColor(sf::Color::Blue);
+        }
+
+        //EVERYTHING BETWEEN window.clear() AND window.display() IS WHAT WILL BE DRAWN DURING THE CURRENT FRAME
+        window.clear();
+
+        //DRAWS THE CURRENT STATUS OF THE WORD
+        window.draw(updateOutline);
+
+        window.draw(correct);
+        window.draw(wrong);
+        window.draw(tryAgain);
+        window.draw(youWin);
+        window.draw(youLost);
+
+        //DRAWS THE GALLOWS/HANGER OBJECT
+        window.draw(gallows_part_1);
+        window.draw(gallows_part_2);
+        window.draw(gallows_part_3);
+        window.draw(gallows_part_4);
+        window.draw(gallows_part_5);
+
+        //DRAWS THE BODY
+        window.draw(head);
+        window.draw(body);
+        window.draw(leg1);
+        window.draw(leg2);
+        window.draw(arm1);
+        window.draw(arm2);
+
+        //display all letters
+        window.draw(a);
+        window.draw(b);
+        window.draw(c);
+        window.draw(d);
+        window.draw(e);
+        window.draw(f);
+        window.draw(g);
+        window.draw(h);
+        window.draw(i);
+        window.draw(j);
+        window.draw(k);
+        window.draw(l);
+        window.draw(m);
+        window.draw(n);
+        window.draw(o);
+        window.draw(p);
+        window.draw(q);
+        window.draw(r);
+        window.draw(s);
+        window.draw(t);
+        window.draw(u);
+        window.draw(v);
+        window.draw(w);
+        window.draw(x);
+        window.draw(y);
+        window.draw(z);
+
+        window.display();
+
+        //DETECTS KEY PRESSED FOR LETTERS A-Z, TURNS GRAY IF PRESSED
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            a.setFillColor(sf::Color{250,250,250,127});
+            window.draw(a);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::B))
+        {
+            b.setFillColor(sf::Color{250,250,250,127});
+            window.draw(b);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C))
+        {
+            c.setFillColor(sf::Color{250,250,250,127});
+            window.draw(c);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D))
+        {
+            d.setFillColor(sf::Color{250,250,250,127});
+            window.draw(d);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+        {
+            e.setFillColor(sf::Color{250,250,250,127});
+            window.draw(e);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::F))
+        {
+            f.setFillColor(sf::Color{250,250,250,127});
+            window.draw(f);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::G))
+        {
+            g.setFillColor(sf::Color{250,250,250,127});
+            window.draw(g);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::H))
+        {
+            h.setFillColor(sf::Color{250,250,250,127});
+            window.draw(h);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::I))
+        {
+            i.setFillColor(sf::Color{250,250,250,127});
+            window.draw(i);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::J))
+        {
+            j.setFillColor(sf::Color{250,250,250,127});
+            window.draw(j);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::K))
+        {
+            k.setFillColor(sf::Color{250,250,250,127});
+            window.draw(k);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L))
+        {
+            l.setFillColor(sf::Color{250,250,250,127});
+            window.draw(l);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::M))
+        {
+            m.setFillColor(sf::Color{250,250,250,127});
+            window.draw(m);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::N))
+        {
+            n.setFillColor(sf::Color{250,250,250,127});
+            window.draw(n);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::O))
+        {
+            o.setFillColor(sf::Color{250,250,250,127});
+            window.draw(o);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P))
+        {
+            p.setFillColor(sf::Color{250,250,250,127});
+            window.draw(p);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q))
+        {
+            q.setFillColor(sf::Color{250,250,250,127});
+            window.draw(q);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+        {
+            r.setFillColor(sf::Color{250,250,250,127});
+            window.draw(r);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
+        {
+            s.setFillColor(sf::Color{250,250,250,127});
+            window.draw(s);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::T))
+        {
+            t.setFillColor(sf::Color{250,250,250,127});
+            window.draw(t);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::U))
+        {
+            u.setFillColor(sf::Color{250,250,250,127});
+            window.draw(u);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::V))
+        {
+            v.setFillColor(sf::Color{250,250,250,127});
+            window.draw(v);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W))
+        {
+            w.setFillColor(sf::Color{250,250,250,127});
+            window.draw(w);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::X))
+        {
+            x.setFillColor(sf::Color{250,250,250,127});
+            window.draw(x);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y))
+        {
+            y.setFillColor(sf::Color{250,250,250,127});
+            window.draw(y);
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z))
+        {
+            z.setFillColor(sf::Color{250,250,250,127});
+            window.draw(z);
+        }
+    }
+
+
+    return 0;
+}
