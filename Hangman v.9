@@ -1,0 +1,589 @@
+#include <SFML/Graphics.hpp>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <bits/stdc++.h>
+
+//WILL CHECK IF THE CURRENT LETTER BY THE USER IS IN THE GAME WORD, IF TRUE THEN IT LETS THE USER KNOW IT IS CORRECT. IF FALSE IT WILL
+// PENALIZE THE USER AND TAKE AN ATTEMPT
+bool isWordGuessed(std::string& currentWordStatus, std::string& gameWord)
+{
+    //USER HAS CORRECTLY GUESSED ALL THE LETTERS
+    if (gameWord == currentWordStatus)
+        return true;
+        //USER HAS NOT GUESSED ALL THE LETTERS
+    else
+        return false;
+}
+
+//BOOL FUNCTION WILL CHECK IF THE LETTER INPUT IS IN THE WORD THEY NEED TO GUESS (will let the user know in the main function)
+bool isLetterInGuess(char currentLetterConst, std::string& gameWord)
+{
+    //ITERATES THROUGH THE WORD THEY NEED TO GUESS, AND CHECK EACH CHARACTER WITH THE USER LETTER INPUT
+    for (const auto& gameLetterIterate : gameWord)
+    {
+        if (gameLetterIterate == currentLetterConst)
+        {
+            return true;
+        }
+        else
+            continue;
+    }
+    //IF NONE MATCH, WILL RETURN FALSE
+    return false;
+}
+
+//CHECKS FOR DUPLICATE KEYBOARD INPUTS, WILL OVERRIDE ATTEMPT COUNTER IF DUPLICATE LETTER FOUND
+bool duplicateLetterCheck(char currentCharCheck, const std::vector<char>&charLetterListConst)
+{
+    //ITERATES THROUGH THE VECTOR THAT CONTAINS LETTERS ALREADY GUESSED, WILL CHECK IF THE CURRENT LETTER INPUT IS IN THE LIST
+    for (const auto &charIterate: charLetterListConst)
+    {
+        if (charIterate == currentCharCheck)
+        {
+            //IF THE CURRENT LETTER INPUT MATCHES THE LETTERS ALREADY GUESSED BY THE USER, it will return TRUE
+            return true;
+        }
+        else
+        {
+            continue;
+        }
+    }
+    //IF THE CURRENT LETTER INPUT IS NOT IN THE VECTOR OF LETTERS ALREADY GUESSED, it will return FALSE
+    return false;
+}
+
+// CHECKS THE AMOUNT OF ATTEMPTS BASED ON HOW MANY TIMES A USER ENTERED A LETTER
+bool attemptCounter(int *triesCounterPtr)
+{
+
+    //DE REFERENCES THE POINTER TO CHECK THE CURRENT STATUS OF ATTEMPTS, IF THE MAX AMOUNT OF ATTEMPTS HAS BEEN REACHED, it will return TRUE
+    if (*triesCounterPtr == 5)
+    {
+        //(test to show that pointer works)
+        std::cout << "\nAttempt: " << *triesCounterPtr;
+        return true;
+    }
+    else
+    {
+        //IF THE MAX AMOUNT OF ATTEMPTS HAS NOT BEEN REACHED, IT WILL ITERATE THE DE-REFERENCED VALUE (triesCounter variable) BY ONE
+        (*triesCounterPtr)++;
+        //(test to show that pointer works)
+        std::cout << "\nAttempt: " << *triesCounterPtr;
+        return false;
+    }
+}
+
+// TAKES IN USER LETTER INPUT TO COMPARE IT WITH THE RANDOMLY CHOSEN WORD
+//TAKES IN PARAMETERS: GAME WORD, CURRENT OUTLINE OF THE WORD ("_ _ _..."), AND THE LETTER THE USER HAS INPUT
+std::string letterGuess(std::string& randomWord, std::string& outlineWord, char userLetter)
+{
+    //FOR LOOP CHECKS IF THE LETTER THE USER HAS INPUT MATCHES ANY LETTER IN THE GAME WORD, IF SO, IT WILL UPDATE THE OUTLINE OF THE WORD
+    // ex. "Is H in the word?" --> then new outline will be "_ _ H _ _"
+    for (int position = 0; position < randomWord.length(); position++)
+    {
+        if (userLetter == randomWord[position])
+        {
+            outlineWord[position] = userLetter;
+        }
+    }
+    return outlineWord;
+}
+
+// GETS THE LENGTH OF THE WORD AND PRINTS THE EMPTY OUTLINE OF THE WORD "_ _ _..."
+std::string hiddenWordOutline(std::string& randomWord)
+{
+    //GETS THE LENGTH OF THE WORD
+    int size = randomWord.length();
+    std::string emptyString;
+
+    //WILL CREATE AN OUTLINE BASED ON THE SIZE OF THE WORD, AND APPEND EACH UNDERSCORE TO THE emptyString VARIABLE
+    for (int iteration = 0; iteration < size; iteration++)
+    {
+        emptyString += "_";
+    }
+    return emptyString;
+}
+
+// CHOOSES A RANDOM WORD FROM THE TXT FILE
+std::string randomWord()
+{
+    // STRING DECLARATION FOR THE WORD THE USER NEEDS TO GUESS
+    std::string hangmanWord;
+
+    //OPENS THE TXT FILE OF THE LIST OF WORDS
+    std::ifstream wordDictionary ("C:/Programming-Gustavo/Dictionary/common-7-letter-words_and8.txt");
+
+    //GETS A RANDOM LINE FROM THE TXT FILE
+    srand((unsigned) time(NULL));
+    int randomNumLine = rand() % 2354;
+
+    //WILL THEN EXTRACT THE WORD FROM THE TXT FILE AND ASSIGN IT TO THE hangmanWord VARIABLE, THIS WILL BE THE WORD THE USER NEEDS TO GUESS
+    if (wordDictionary.is_open())
+    {
+        //iterates through the txt file until it gets to the word
+        for (int iteration = 1; iteration < randomNumLine; ++iteration)
+        {
+            //reads the word and sends it hangmanWord
+            std::getline(wordDictionary,hangmanWord);
+        }
+    }
+
+    //returns it to the main function
+    return hangmanWord;
+}
+
+int main()
+{
+    //DECLARING ALL THE SHAPES/LINES IN THE GAME
+
+    //THE GALLOWS/HANGER OBJECT
+    sf::RectangleShape gallows_part_1(sf::Vector2f(500.f, 20.f));
+    gallows_part_1.setFillColor(sf::Color{150, 75, 0});
+
+    sf::RectangleShape gallows_part_2(sf::Vector2f(700.f, 20.f));
+    gallows_part_2.setFillColor(sf::Color{150, 75, 0});
+
+    sf::RectangleShape gallows_part_3(sf::Vector2f(300.f, 20.f));
+    gallows_part_3.setFillColor(sf::Color{150, 75, 0});
+
+    sf::RectangleShape gallows_part_4(sf::Vector2f(80.f, 5.f));
+    gallows_part_4.setFillColor(sf::Color{150, 75, 0});
+
+    sf::RectangleShape gallows_part_5(sf::Vector2f(125.f, 20.f));
+    gallows_part_5.setFillColor(sf::Color{150, 75, 0});
+
+    //EACH BODY PART
+    sf::CircleShape head(70.f);
+    sf::RectangleShape body(sf::Vector2f(225.f, 12.f));
+    sf::RectangleShape arm1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape arm2(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg1(sf::Vector2f(150.f, 12.f));
+    sf::RectangleShape leg2(sf::Vector2f(150.f, 12.f));
+
+    //FONT DECLARED
+    sf::Font font;
+    sf::Font MenuFont;
+    sf::Font Start;
+    font.loadFromFile("C:/Programming-Gustavo/Fonts/SF Funk Master.ttf");
+    MenuFont.loadFromFile("C:/Programming-Gustavo/Fonts/Nightmare Before Christmas.ttf");
+    Start.loadFromFile("C:/Programming-Gustavo/Fonts/Elektra.ttf");
+
+    //SETTING ALL THE SHAPES TO THEIR POSITION
+    //SET POSITION OF THE GALLOWS/HANGER
+    gallows_part_1.setPosition(100.f, 850.f);
+    gallows_part_2.rotate(90.f);
+    gallows_part_2.setPosition(230.f, 150.f);
+    gallows_part_3.setPosition(230.f, 150.f);
+    gallows_part_4.rotate(90.f);
+    gallows_part_4.setPosition(450.f, 170.f);
+    gallows_part_5.rotate(135.f);
+    gallows_part_5.setPosition(315.f, 170.f);
+
+    //SET POSITION OF THE BODY PARTS AND COLOR
+    head.setPosition(380.f, 250.f);
+    head.setOutlineThickness(15.f);
+    body.rotate(90.f);
+    body.setPosition(450.f, 370.f);
+    arm1.rotate(45.f);
+    arm1.setPosition(448.f,415.f);
+    arm2.rotate(135.f);
+    arm2.setPosition(450.f, 420.f);
+    leg1.rotate(45.f);
+    leg1.setPosition(448.f, 585.f);
+    leg2.rotate(135.f);
+    leg2.setPosition(450.f, 590.f);
+    head.setFillColor(sf::Color::Transparent);
+    head.setOutlineColor(sf::Color::Transparent);
+    body.setFillColor(sf::Color::Transparent);
+    arm1.setFillColor(sf::Color::Transparent);
+    arm2.setFillColor(sf::Color::Transparent);
+    leg1.setFillColor(sf::Color::Transparent);
+    leg2.setFillColor(sf::Color::Transparent);
+
+    //SET UP THE ALPHABET FOR THE LETTER TRACKER W/(COLOR, POSITION, SIZE)
+    sf::Text a("A",font,50);
+    a.setPosition(1200.f, 100.f);
+    sf::Text b("B",font,50);
+    b.setPosition(1250.f, 100.f);
+    sf::Text c("C",font,50);
+    c.setPosition(1300.f, 100.f);
+    sf::Text d("D",font,50);
+    d.setPosition(1350.f, 100.f);
+    sf::Text e("E",font,50);
+    e.setPosition(1400.f, 100.f);
+    sf::Text f("F",font,50);
+    f.setPosition(1450.f, 100.f);
+    sf::Text g("G",font,50);;
+    g.setPosition(1500.f, 100.f);
+    sf::Text h("H",font,50);
+    h.setPosition(1550.f, 100.f);
+    sf::Text i("I",font,50);;
+    i.setPosition(1600.f, 100.f);
+    sf::Text j("J",font,50);
+    j.setPosition(1635.f, 100.f);
+    sf::Text k("K",font,50);
+    k.setPosition(1685.f, 100.f);
+    sf::Text l("L",font,50);
+    l.setPosition(1735.f, 100.f);
+    sf::Text m("M",font,50);
+    m.setPosition(1785.f, 100.f);
+    sf::Text n("N",font,50);
+    n.setPosition(1200.f, 175.f);
+    sf::Text o("O",font,50);
+    o.setPosition(1250.f, 175.f);
+    sf::Text p("P",font,50);
+    p.setPosition(1300.f, 175.f);
+    sf::Text q("Q",font,50);
+    q.setPosition(1350.f, 175.f);
+    sf::Text r("R",font,50);
+    r.setPosition(1400.f, 175.f);
+    sf::Text s("S",font,50);
+    s.setPosition(1450.f, 175.f);
+    sf::Text t("T",font,50);
+    t.setPosition(1500.f, 175.f);
+    sf::Text u("U",font,50);
+    u.setPosition(1550.f, 175.f);
+    sf::Text v("V",font,50);
+    v.setPosition(1600.f, 175.f);
+    sf::Text w("W",font,50);
+    w.setPosition(1650.f, 175.f);
+    sf::Text x("X",font,50);
+    x.setPosition(1720.f, 175.f);
+    sf::Text y("Y",font,50);
+    y.setPosition(1770.f, 175.f);
+    sf::Text z("Z",font,50);
+    z.setPosition(1820.f, 175.f);
+
+    //SETS THE TEXT SETTINGS FOR THE WORDS USED IN THE GAME
+    sf::Text correct("Correct!", font, 100);
+    correct.setFillColor(sf::Color::Transparent);
+    correct.setPosition(1250, 400);
+
+    sf::Text wrong("WRONG", font, 100);
+    wrong.setFillColor(sf::Color::Transparent);
+    wrong.setPosition(1320, 350);
+
+    sf::Text tryAgain("TRY AGAIN", font, 100);
+    tryAgain.setFillColor(sf::Color::Transparent);
+    tryAgain.setPosition(1250, 500);
+
+    sf::Text youWin("You Win!", font, 100);
+    youWin.setFillColor(sf::Color::Transparent);
+    youWin.setPosition(700, 450);
+
+    sf::Text youLost("YOU LOST", font, 100);
+    youLost.setFillColor(sf::Color::Transparent);
+    youLost.setPosition(700, 450);
+
+
+    //GETS A RANDOM WORD FROM THE randomWord() FUNCTION
+    std::string gameWord = randomWord();
+
+    //TURNS THE WORD INTO ALL LOWERCASE, by iterating through each character
+    for (auto &character: gameWord) {
+        character = tolower(character);
+    }
+
+    //LOAD WINDOW
+    //RENDERS THE SIZE AND TITLE OF THE WINDOW
+    sf::RenderWindow gameScreen(sf::VideoMode(1920, 1080), "Hangman!");
+
+
+    //testing purposes (terminal window)
+    std::cout << gameWord;
+
+    //CREATES THE UNDERSCORE OUTLINE BY CALLING THE hiddenWordOutline() FUNC. AND SENDING THE VARIABLE gameWord (word user needs to guess)
+    std::string wordOutline = hiddenWordOutline(gameWord);
+
+    //CREATES AN WORD OUTLINE OBJECT THAT THE WINDOW WILL DISPLAY (takes in the wordOutline string)
+    sf::Text updateOutline(wordOutline, font, 90);
+    updateOutline.setFillColor(sf::Color::White);
+    updateOutline.setPosition(1250, 765);
+
+    //TEXT DRAWINGS FROM GRAPHICS V.2
+
+    //NAME OF THE MENU SCREEN
+    sf::RenderWindow menuScreen(sf::VideoMode(1920, 1080), "Hangman Menu!");
+
+    //BACKGROUND COLOR OBJECT
+    sf::RectangleShape Sample(sf::Vector2f(1920.f, 1080.f));
+    Sample.setFillColor(sf::Color::Blue);
+
+    //TEXT FOR THE MENU
+    sf::Text title("Hangman!", font, 120);
+    title.setFillColor(sf::Color::White);
+    title.setPosition(750.f, 150.f);
+
+    sf::Text start("Hit Enter to Start", font, 25);
+    start.setFillColor(sf::Color::White);
+    start.setPosition(775.f, 600.f);
+
+    sf::Text end("Hit Escape to Leave", font, 25);
+    end.setFillColor(sf::Color::White);
+    end.setPosition(775.f, 700.f);
+
+    //Output menu screen FROM GRAPHICS V.2
+    while (menuScreen.isOpen()) {
+        sf::Event event{};
+
+        while (menuScreen.pollEvent(event)) {
+
+            //Close the window when X out
+            if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+                menuScreen.close();
+                break;
+            }
+            menuScreen.clear();
+            menuScreen.draw(Sample);
+            menuScreen.draw(title);
+            menuScreen.draw(start);
+            menuScreen.draw(end);
+            menuScreen.display();
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                menuScreen.close();
+            }
+        }
+    }
+
+    //TRIES COUNTER VARIABLE
+    int triesCounter = 0;
+    char currentChar;
+
+    //VECTOR LIST OF THE WORDS THE USER HAS INPUT THROUGHOUT THE GAME
+    std::vector<char> charLetterList;
+
+    // the window for the display
+    while (gameScreen.isOpen())
+    {
+        sf::Event event{};
+        while (gameScreen.pollEvent(event))
+            if (event.type == sf::Event::Closed || sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {
+                gameScreen.close();
+                break;
+            }
+                //IF A THERE IS A LETTER INPUT, ACTIVATE THIS EVENT
+            else if (event.type == sf::Event::TextEntered && event.text.unicode > 96 && event.text.unicode < 128) {
+                //ASSIGNS THE CURRENT LETTER INPUT TO A VARIABLE
+                currentChar = static_cast<char>(event.text.unicode);
+
+                //WILL USE THE CURRENT LETTER (currentChar) FOR THE ACTIONS BELOW
+                //GIVEN THE LIST OF WORDS THAT THE USER INPUT, IT WILL CHECK IF THE USER PRESSES THE LETTER AGAIN, TO AVOID PENALIZATION
+                bool duplicateBool = duplicateLetterCheck(currentChar, charLetterList);
+                if (duplicateBool) {
+                    std::cout << "\nAlready tried!";
+                }
+
+                    //IF THE USER DIDN'T ALREADY INPUT A SPECIFIC LETTER, WILL PERFORM THE FOLLOWING
+                else {
+                    //ADD THE LETTER TO THE DUPLICATE LETTER LIST
+                    charLetterList.push_back(currentChar);
+
+                    //CREATES THE NEW OUTLINE BY SENDING THE GAME WORD, CURRENT WORD OUTLINE, AND THE LETTER THAT THE USER INPUT TO A
+                    // FUNCTION
+                    updateOutline.setString(letterGuess(gameWord, wordOutline, currentChar));
+
+                    //BOOL FUNCTION WILL CHECK IF THE USER INPUT LETTER IS IN THE GAME WORD, WILL LET THE USER KNOW IF TRUE
+                    bool isInGuess = isLetterInGuess(currentChar, gameWord);
+                    if (isInGuess) {
+                        tryAgain.setFillColor(sf::Color::Transparent);
+                        wrong.setFillColor(sf::Color::Transparent);
+                        correct.setFillColor(sf::Color::Green);
+                        std::cout << "\nIs in Guess!";
+                        //                      break;
+                    }
+
+                        //IF THE LETTER IS NOT IN THE WORD, THE FOLLOWING ACTIONS WILL BE PERFORMED
+                    else {
+                        correct.setFillColor(sf::Color::Transparent);
+
+                        int random = rand() % 2;
+                        if (random == 1) {
+                            wrong.setFillColor(sf::Color::Red);
+                        } else {
+                            tryAgain.setFillColor(sf::Color::Red);
+                        }
+
+                        //BOOL VALUE WILL SEND THE CURRENT triesCounter (initially 0) VARIABLE TO DETERMINE BETWEEN TRUE/FALSE
+                        bool counterChecker = attemptCounter(&triesCounter);
+
+                        //IF BOOL SENDS TRUE (meaning that the max amount of attempts has been used) PROGRAM WILL END
+                        if (counterChecker) {
+                            //DEFAULTS THE WRONG ATTEMPTS DRAWINGS TO Transparent (to hide them) AND DISPLAYS THE "YOU LOST" IMAGE
+                            wrong.setFillColor(sf::Color::Transparent);
+                            tryAgain.setFillColor(sf::Color::Transparent);
+                            arm2.setFillColor(sf::Color::Blue);
+                            youLost.setFillColor(sf::Color::Cyan);
+                        }
+                    }
+                }
+            }
+
+
+        //WILL CONSTANTLY CHECK IF THE USER HAS ALREADY GUESSED ALL THE LETTERS FOR THE GIVEN WORD THEY NEED TO GUESS, WILL END
+        // PROGRAM IF TRUE
+        if (isWordGuessed(wordOutline, gameWord))
+        {
+            youWin.setFillColor(sf::Color::Magenta);
+        }
+
+        //CHANGE THE COLOR OF THE HANGMAN BODY TO MAKE IT VISIBLE AFTER AN ATTEMPT IS TAKEN
+        if (triesCounter == 1) {
+            head.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 2) {
+            body.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 3) {
+            leg1.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 4) {
+            leg2.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 5) {
+            arm1.setFillColor(sf::Color::Blue);
+        }
+        if (triesCounter == 6) {
+            arm2.setFillColor(sf::Color::Blue);
+        }
+        //EVERYTHING BETWEEN window.clear() AND window.display() IS WHAT WILL BE DRAWN DURING THE CURRENT FRAME
+
+        //DRAWS THE CURRENT STATUS OF THE WORD
+        gameScreen.clear();
+        gameScreen.draw(updateOutline);
+
+        gameScreen.draw(correct);
+        gameScreen.draw(wrong);
+        gameScreen.draw(tryAgain);
+        gameScreen.draw(youWin);
+        gameScreen.draw(youLost);
+
+        //DRAWS THE GALLOWS/HANGER OBJECT
+        gameScreen.draw(gallows_part_1);
+        gameScreen.draw(gallows_part_2);
+        gameScreen.draw(gallows_part_3);
+        gameScreen.draw(gallows_part_4);
+        gameScreen.draw(gallows_part_5);
+
+        //DRAWS THE BODY
+        gameScreen.draw(head);
+        gameScreen.draw(body);
+        gameScreen.draw(leg1);
+        gameScreen.draw(leg2);
+        gameScreen.draw(arm1);
+        gameScreen.draw(arm2);
+
+        //display all letters
+        gameScreen.draw(a);
+        gameScreen.draw(b);
+        gameScreen.draw(c);
+        gameScreen.draw(d);
+        gameScreen.draw(e);
+        gameScreen.draw(f);
+        gameScreen.draw(g);
+        gameScreen.draw(h);
+        gameScreen.draw(i);
+        gameScreen.draw(j);
+        gameScreen.draw(k);
+        gameScreen.draw(l);
+        gameScreen.draw(m);
+        gameScreen.draw(n);
+        gameScreen.draw(o);
+        gameScreen.draw(p);
+        gameScreen.draw(q);
+        gameScreen.draw(r);
+        gameScreen.draw(s);
+        gameScreen.draw(t);
+        gameScreen.draw(u);
+        gameScreen.draw(v);
+        gameScreen.draw(w);
+        gameScreen.draw(x);
+        gameScreen.draw(y);
+        gameScreen.draw(z);
+
+        gameScreen.display();
+
+        //DETECTS KEY PRESSED FOR LETTERS A-Z, TURNS GRAY IF PRESSED
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+        {
+            a.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(a);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::B)) {
+            b.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(b);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::C)) {
+            c.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(c);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
+            d.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(d);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::E)) {
+            e.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(e);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::F)) {
+            f.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(f);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::G)) {
+            g.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(g);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::H)) {
+            h.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(h);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::I)) {
+            i.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(i);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::J)) {
+            j.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(j);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::K)) {
+            k.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(k);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::L)) {
+            l.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(l);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::M)) {
+            m.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(m);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::N)) {
+            n.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(n);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::O)) {
+            o.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(o);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::P)) {
+            p.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(p);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Q)) {
+            q.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(q);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::R)) {
+            r.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(r);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
+            s.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(s);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::T)) {
+            t.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(t);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::U)) {
+            u.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(u);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::V)) {
+            v.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(v);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::W)) {
+            w.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(w);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::X)) {
+            x.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(x);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Y)) {
+            y.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(y);
+        } else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Z)) {
+            z.setFillColor(sf::Color{250, 250, 250, 127});
+            gameScreen.draw(z);
+        }
+    }
+}
