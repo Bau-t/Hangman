@@ -497,7 +497,7 @@ int main()
                             tryAgain.setFillColor(sf::Color::Transparent);
                             tryAgain.setOutlineColor(sf::Color::Transparent);
 
-                            arm2.setFillColor(sf::Color::Blue);
+                            arm2.setFillColor(sf::Color{37,90,94});
                             youLost.setFillColor(sf::Color::Cyan);
                             youLost.setOutlineColor(sf::Color::Black);
                         }
@@ -518,27 +518,27 @@ int main()
         //CHANGE THE COLOR OF THE HANGMAN BODY TO MAKE IT VISIBLE AFTER AN ATTEMPT IS TAKEN
         if (triesCounter == 1)
         {
-            head.setFillColor(sf::Color::Blue);
+            head.setFillColor(sf::Color{37,90,94});
         }
         if (triesCounter == 2)
         {
-            body.setFillColor(sf::Color::Blue);
+            body.setFillColor(sf::Color{37,90,94});
         }
         if (triesCounter == 3)
         {
-            leg1.setFillColor(sf::Color::Blue);
+            leg1.setFillColor(sf::Color{37,90,94});
         }
         if (triesCounter == 4)
         {
-            leg2.setFillColor(sf::Color::Blue);
+            leg2.setFillColor(sf::Color{37,90,94});
         }
         if (triesCounter == 5)
         {
-            arm1.setFillColor(sf::Color::Blue);
+            arm1.setFillColor(sf::Color{37,90,94});
         }
         if (triesCounter == 6)
         {
-            arm2.setFillColor(sf::Color::Blue);
+            arm2.setFillColor(sf::Color{37,90,94});
         }
 
         //EVERYTHING BETWEEN window.clear() AND window.display() IS WHAT WILL BE DRAWN DURING THE CURRENT FRAME
