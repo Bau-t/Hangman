@@ -24,15 +24,6 @@ int main()
     sf::RectangleShape BackgroundMenu(sf::Vector2f(1920.f, 1080.f));
     sf::RectangleShape BackgroundGame(sf::Vector2f(1920.f, 1080.f));
 
-//    sf::Music music;
-//    if (!music.openFromFile("Not Giving Up.ogg"))
-//    {
-//        std::cout << "Can't find the file";
-//        return -1; // error
-//    }
-//    music.setLoop(true);
-
-
     //Text and font declared
     sf::Font font;
     sf::Font MenuFont;
@@ -318,7 +309,6 @@ int main()
 
                         //Display all the graphics
                         window.clear();
-//                        music.play();
                         window.draw(BackgroundGame);
                         window.draw(gallows_part_1);
                         window.draw(gallows_part_2);
