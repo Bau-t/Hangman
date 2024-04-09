@@ -165,9 +165,9 @@ int main()
     sf::Font font;
     sf::Font MenuFont;
     sf::Font Start;
-    font.loadFromFile("C:/SF Funk Master.ttf");
-    MenuFont.loadFromFile("C:/NightmareBeforeChristmas-2v8e.ttf");
-    Start.loadFromFile("C:/elektra.ttf");
+    font.loadFromFile("C:/SF Funk Master.ttf"); //Credit: 1001 Free Font
+    MenuFont.loadFromFile("C:/NightmareBeforeChristmas-2v8e.ttf"); //Credit: 1001 Free Font
+    Start.loadFromFile("C:/elektra.ttf"); //Credit: 1001 Free Font
 
     //GAME TEXTURES
     //Credit: Designed by Freepik - starline
