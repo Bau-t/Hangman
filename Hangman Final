@@ -370,15 +370,15 @@ int main()
     sf::RenderWindow menuScreen(sf::VideoMode(1920, 1080), "Hangman Menu!");
 
     //TEXT FOR THE MENU
-    sf::Text title("Hangman!", font, 120);
+    sf::Text title("Hangman!", MenuFont, 120);
     title.setFillColor(sf::Color::White);
     title.setPosition(750.f, 150.f);
 
-    sf::Text start("Hit Enter to Start", font, 25);
+    sf::Text start("Hit Enter to Start", MenuFont, 25);
     start.setFillColor(sf::Color::White);
     start.setPosition(775.f, 600.f);
 
-    sf::Text end("Hit Escape to Leave", font, 25);
+    sf::Text end("Hit Escape to Leave", MenuFont, 25);
     end.setFillColor(sf::Color::White);
     end.setPosition(775.f, 700.f);
 
