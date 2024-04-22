@@ -165,9 +165,9 @@ int main()
     sf::Font font;
     sf::Font MenuFont;
     sf::Font Start;
-    font.loadFromFile("C:/SF Funk Master.ttf"); //Credit: 1001 Free Font
-    MenuFont.loadFromFile("C:/NightmareBeforeChristmas-2v8e.ttf"); //Credit: 1001 Free Font
-    Start.loadFromFile("C:/elektra.ttf"); //Credit: 1001 Free Font
+    font.loadFromFile("C:/SF Funk Master.ttf"); //Credit: 1001 Free Fonts
+    MenuFont.loadFromFile("C:/NightmareBeforeChristmas-2v8e.ttf"); //Credit: 1001 Free Fonts
+    Start.loadFromFile("C:/elektra.ttf"); //Credit: 1001 Free Fonts
 
     //GAME TEXTURES
     //Credit: Designed by Freepik - starline
@@ -179,7 +179,7 @@ int main()
     BackgroundTexture1.setSmooth(true);
     BackgroundTexture1.setRepeated(true);
 
-    //Credit: Designed by Freepik - freepik
+    //Credit: Designed by Freepik - travel-photography
     sf::Texture BackgroundTexture2;
     if (!BackgroundTexture2.loadFromFile("C:/Users/bauti/Downloads/desert2.jpg"))
     {
